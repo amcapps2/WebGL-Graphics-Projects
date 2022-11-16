@@ -8,7 +8,7 @@
 <!-- If you add additional .js files, be sure to add them here. -->
 <script src="gl-matrix-min.js"></script>
 <script src="Terrain.js"></script>
-<script src="MP2.js"></script>
+<script src="MP3.js"></script>
 <script src="http://threejs.org/build/three.min.js"></script>
 
 
@@ -65,9 +65,6 @@ void main(void) {
     float b = .4-h;
     float g = (r + b)/2.0;
     if (h <= w-.03 ) {
-        //r = (r*h + .05)*.8;
-        //b = ((b+(1.0-h))*(h*2.0))*.8; 
-        //g = (g + g*h)*.8;
         r = 0.0;
         g = 0.20+val1;
         b = 0.30+val2;
