@@ -1,0 +1,154 @@
+<!-- CS 418 Iteractive Computer Graphics -->
+<!-- @author Alex Capps <amcapps2@illinois.edu> -->
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+  <title>Simple Particle Physics Engine</title>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 1200px;
+      height: 760px;
+      margin: 0 auto;
+      display: flex;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 36px;
+    }
+
+    h2 {
+      font-weight: unset;
+      text-align: center;
+      font-size: 20px;
+    }
+
+    #myGLCanvas {
+      margin: 0 auto;
+      width: 760px;
+    }
+
+    .panel {
+      width: 400px;
+    }
+
+    #input_form {
+      line-height: 30px;
+    }
+
+    .values {
+      margin-left: 15px;
+      display: inline;
+    }
+  </style>
+</head>
+
+
+<script id="shader-gouraud-phong-vs" type="x-shader/x-vertex">
+  attribute vec3 aVertexNormal;
+  attribute vec3 aVertexPosition;
+   
+  uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;
+  uniform mat3 uNMatrix;
+    
+  varying vec3 vPosition;
+  varying vec3 vNormal;
+
+  void main(void) {
+    // Get vertex position in EYE coordinates. Then send to fragment shader.
+    vec4 vertexPositionEye4 = uMVMatrix * vec4(aVertexPosition, 1.0);
+    vPosition = vertexPositionEye4.xyz / vertexPositionEye4.w;
+      
+    // Transform normal (n) to EYE coordinates. Then send to the fragment shader.
+    vNormal = normalize(uNMatrix * aVertexNormal);
+    gl_Position = uPMatrix*uMVMatrix*vec4(aVertexPosition, 1.0);      
+  }
+</script>
+
+<script id="shader-gouraud-phong-fs" type="x-shader/x-fragment">
+  precision mediump float;
+
+  uniform vec3 uLightPosition;
+  
+  uniform vec3 uAmbientMaterialColor;
+  uniform vec3 uDiffuseMaterialColor;
+  uniform vec3 uSpecularMaterialColor;
+
+  uniform vec3 uAmbientLightColor;
+  uniform vec3 uDiffuseLightColor;
+  uniform vec3 uSpecularLightColor;
+
+  uniform float uShininess;
+
+  varying vec3 vPosition;
+  varying vec3 vNormal;
+
+  void main(void) {
+    // Calculate Vector (l) to light source (uLightPosition)
+    vec3 vectorToLightSource = normalize(uLightPosition - vPosition);
+    
+    // Calculate (n) dot (l) to do diffuse lighting.
+    float diffuseLightWeightning = max(dot(vNormal, 
+                                    vectorToLightSource), 0.0);
+                                       
+    // Calculate Reflection Vector (r) for specular light.
+    vec3 reflectionVector = normalize(reflect(-vectorToLightSource, vNormal));
+    
+    // CAMERA: In EYE coordinates, located in the origin, pointing along
+    // neg. z-axis. 
+    // Calculate viewVector (v) in EYE coordinates:
+    vec3 viewVectorEye = -normalize(vPosition);
+    // (0.0, 0.0, 0.0) - vPosition
+
+    float r_dot_v = max(dot(reflectionVector, viewVectorEye), 0.0);
+    
+    float specularLightWeightning = pow(r_dot_v, uShininess);
+
+    //Add reflection components. Then send to the fragment shader
+    gl_FragColor = vec4(((uAmbientLightColor*uAmbientMaterialColor)
+        + (uDiffuseLightColor*uDiffuseMaterialColor) * diffuseLightWeightning
+        + (uSpecularLightColor*uSpecularMaterialColor) * specularLightWeightning),1.0);
+ }
+</script>
+
+
+<script src="gl-matrix-min.js"></script>
+<script src="webgl-utils.js"></script>
+<script src="Sphere.js"></script>
+<script src="Particle.js"></script>
+<script src="mp4.js"></script>
+
+<body onload="startup();">
+  <canvas id="myGLCanvas" width="760" height="760"></canvas>
+  <div class="panel">
+    <h1>Simple Physics Engine</h1>
+    <h2>Author: Alex Capps</h2>
+    <br>
+    <form id="input_form">
+      <fieldset>
+        <legend>Parameters</legend>
+        Gravity&nbsp &nbsp
+        <input type="range" name="parameters" id="gravity" max="20" min="-20" step="0.08" value="9.8">
+        <div class="values" id="gravityValue">9.8</div><br>
+        Drag&nbsp &nbsp
+        <input type="range" name="parameters" id="drag" max="1" min="0" step="0.01" value="0.1">
+        <div class="values" id="dragValue">0.1</div><br>
+        Bounce&nbsp &nbsp
+        <input type="range" name="parameters" id="bounce" max="1" min="0" step="0.01" value="0.90">
+        <div class="values" id="bounceValue">0.95</div><br>
+      </fieldset>
+      <br>
+      <fieldset>
+        <legend>Operations</legend>
+        <input type="button" name="operations" id="add" value="Add" onclick="addParticles()">&nbsp &nbsp Add <br>
+        <input type="button" name="operations" id="burst" value="Burst" onclick="burstParticles()">&nbsp &nbsp Burst <br>
+        <input type="button" name="operations" id="reset" value="Reset" onclick="resetParticles()">&nbsp &nbsp Reset
+      </fieldset>
+    </form>
+  </div>
+</body>
+
+</html>
