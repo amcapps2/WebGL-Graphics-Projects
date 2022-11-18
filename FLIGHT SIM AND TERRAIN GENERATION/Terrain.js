@@ -1,6 +1,7 @@
 /**
  * @file Terrain.js - A simple 3D terrain model for WebGL
  * @author Ian Rudnick <itr2@illinois.edu>
+ * @author Alex Capps <amcapps2@illinois.edu>
  * @brief Starter code for CS 418 MP2 at the University of Illinois at
  * Urbana-Champaign.
  * 
