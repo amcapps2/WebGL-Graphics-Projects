@@ -1,6 +1,7 @@
 /**
  * @file A simple WebGL example drawing a triangle with colors
  * @author Eric Shaffer <shaffer1@eillinois.edu>
+ * @author Alex Capps <amcapps2@illinois.edu>
  * 
  * Updated Spring 2021 to use WebGL 2.0 and GLSL 3.00
  */
